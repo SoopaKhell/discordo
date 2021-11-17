@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/ayntgl/discordgo"
+	"github.com/ayntgl/discordo/discord"
 	"github.com/ayntgl/discordo/ui"
 	"github.com/ayntgl/discordo/util"
 	"github.com/gdamore/tcell/v2"
@@ -76,10 +77,14 @@ func main() {
 			SetRoot(mainFlex, true).
 			SetFocus(channelsTree)
 
-		session = newSession()
-		session.Token = token
-		session.Identify.Token = token
-		if err := session.Open(); err != nil {
+		// session = newSession()
+		// session.Token = token
+		// session.Identify.Token = token
+		// if err := session.Open(); err != nil {
+		// 	panic(err)
+		// }
+		cl := discord.NewClient()
+		if err := cl.Connect(); err != nil {
 			panic(err)
 		}
 	} else {
