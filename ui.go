@@ -4,8 +4,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/atotto/clipboard"
 	"github.com/ayntgl/discordgo"
+	"github.com/ayntgl/discordo/clipboard"
 	"github.com/ayntgl/discordo/util"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -220,7 +220,7 @@ func onMessagesViewInputCapture(e *tcell.EventKey) *tcell.EventKey {
 		}
 
 		_, m := util.FindMessageByID(selectedChannel.Messages, hs[0])
-		err := clipboard.WriteAll(m.Content)
+		err := clipboard.Write([]byte(m.Content))
 		if err != nil {
 			return nil
 		}
@@ -269,9 +269,8 @@ func onMessageInputFieldInputCapture(e *tcell.EventKey) *tcell.EventKey {
 		messageInputField.SetText("")
 		return nil
 	case tcell.KeyCtrlV:
-		text, _ := clipboard.ReadAll()
-		text = messageInputField.GetText() + text
-		messageInputField.SetText(text)
+		b, _ := clipboard.Read()
+		messageInputField.SetText(messageInputField.GetText() + string(b))
 		return nil
 	case tcell.KeyEscape:
 		messageInputField.SetText("")
