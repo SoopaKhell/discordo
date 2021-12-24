@@ -17,6 +17,9 @@ func NewMainFlex(app *App) *tview.Flex {
 	app.ChannelsTreeView.
 		SetTopLevel(1).
 		SetRoot(tview.NewTreeNode("")).
+		SetSelectedFunc(func(node *tview.TreeNode) {
+			onChannelsTreeViewSelected(app, node)
+		}).
 		SetBorder(true).
 		SetBorderPadding(0, 0, 1, 0)
 
