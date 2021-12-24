@@ -5,17 +5,20 @@ import (
 )
 
 func NewMainFlex(app *App) *tview.Flex {
-	mainFlex := tview.NewFlex()
+	app.GuildsList.
+		ShowSecondaryText(false).
+		AddItem("Direct Messages", "", 0, nil).
+		SetSelectedFunc(func(idx int, _, _ string, _ rune) {
+			onGuildsListSelected(app, idx)
+		}).
+		SetBorder(true).
+		SetBorderPadding(0, 0, 1, 0)
 
 	app.ChannelsTreeView.
 		SetTopLevel(1).
 		SetRoot(tview.NewTreeNode("")).
 		SetBorder(true).
 		SetBorderPadding(0, 0, 1, 0)
-	mainFlex.AddItem(app.ChannelsTreeView, 0, 1, false)
-
-	rightFlex := tview.NewFlex().
-		SetDirection(tview.FlexRow)
 
 	app.MessagesTextView.
 		SetRegions(true).
@@ -32,10 +35,17 @@ func NewMainFlex(app *App) *tview.Flex {
 		SetBorder(true).
 		SetBorderPadding(0, 0, 1, 0)
 
-	rightFlex.
+	leftFlex := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(app.GuildsList, 10, 1, false).
+		AddItem(app.ChannelsTreeView, 0, 1, false)
+	rightFlex := tview.NewFlex().
+		SetDirection(tview.FlexRow).
 		AddItem(app.MessagesTextView, 0, 1, false).
 		AddItem(app.MessageInputField, 3, 1, false)
-	mainFlex.AddItem(rightFlex, 0, 4, false)
+	mainFlex := tview.NewFlex().
+		AddItem(leftFlex, 0, 1, false).
+		AddItem(rightFlex, 0, 4, false)
 
 	return mainFlex
 }

@@ -6,15 +6,16 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+const USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
+
 type GeneralConfig struct {
-	UserAgent            string `toml:"user_agent"`
-	Mouse                bool   `toml:"mouse"`
-	DesktopNotifications bool   `toml:"desktop_notifications"`
-	FetchMessagesLimit   int    `toml:"fetch_messages_limit"`
+	UserAgent          string `toml:"user_agent"`
+	Mouse              bool   `toml:"mouse"`
+	Notifications      bool   `toml:"desktop_notifications"`
+	FetchMessagesLimit int    `toml:"fetch_messages_limit"`
 }
 
 type ThemeConfig struct{}
-
 type KeybindingsConfig struct{}
 
 type Config struct {
@@ -26,16 +27,17 @@ type Config struct {
 func NewConfig() Config {
 	return Config{
 		General: GeneralConfig{
-			UserAgent:            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
-			Mouse:                true,
-			DesktopNotifications: true,
-			FetchMessagesLimit:   50,
+			UserAgent:          USER_AGENT,
+			Mouse:              true,
+			Notifications:      true,
+			FetchMessagesLimit: 50,
 		},
 		Theme:       ThemeConfig{},
 		Keybindings: KeybindingsConfig{},
 	}
 }
 
+// LoadConfig creates default configuration (if the configuration file does not exist already) or reads the configuration file from user configuration directory.
 func LoadConfig() Config {
 	configPath, err := os.UserConfigDir()
 	if err != nil {

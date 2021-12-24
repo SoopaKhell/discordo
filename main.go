@@ -26,7 +26,7 @@ func main() {
 
 		app.
 			SetRoot(ui.NewMainFlex(app), true).
-			SetFocus(app.ChannelsTreeView)
+			SetFocus(app.GuildsList)
 	} else {
 		loginForm := ui.NewLoginForm().
 			AddButton("Login", nil)

@@ -1,50 +1,71 @@
 package ui
 
 import (
-	"github.com/ayntgl/discordgo"
+	"sort"
+
 	"github.com/ayntgl/discordo/config"
+	"github.com/diamondburned/arikawa/v3/api"
+	"github.com/diamondburned/arikawa/v3/gateway"
+	"github.com/diamondburned/arikawa/v3/state"
 	"github.com/rivo/tview"
 )
 
 type App struct {
 	*tview.Application
 
+	GuildsList        *tview.List
 	ChannelsTreeView  *tview.TreeView
 	MessagesTextView  *tview.TextView
 	MessageInputField *tview.InputField
 
-	Session *discordgo.Session
-	Config  config.Config
+	State  *state.State
+	Config config.Config
 }
 
 func NewApp() *App {
-	s, _ := discordgo.New()
 	return &App{
 		Application: tview.NewApplication(),
 
+		GuildsList:        tview.NewList(),
 		ChannelsTreeView:  tview.NewTreeView(),
 		MessagesTextView:  tview.NewTextView(),
 		MessageInputField: tview.NewInputField(),
 
-		Session: s,
-		Config:  config.LoadConfig(),
+		Config: config.LoadConfig(),
 	}
 }
 
+// Connect initializes a new state and modifies default properties, adds gateway event handlers, and opens a new websocket connection to the Discord gateway.
 func (app *App) Connect(token string) error {
-	app.Session.UserAgent = "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0"
-	app.Session.Identify = discordgo.Identify{
-		Token: token,
-		Properties: discordgo.IdentifyProperties{
-			OS:      "Linux",
-			Browser: "Firefox",
-			Device:  "",
-		},
-		Compress:           false,
-		Intents:            0,
-		LargeThreshold:     0,
-		GuildSubscriptions: false,
-	}
+	app.State = state.New(token)
 
-	return app.Session.Open()
+	api.UserAgent = app.Config.General.UserAgent
+	gateway.DefaultIdentity = gateway.IdentifyProperties{
+		OS:      "Linux",
+		Browser: "Firefox",
+		Device:  "",
+	}
+	app.State.AddHandler(app.onSessionReady)
+
+	return app.State.Open(app.State.Context())
+}
+
+func (app *App) onSessionReady(r *gateway.ReadyEvent) {
+	sort.Slice(r.Guilds, func(a, b int) bool {
+		found := false
+		for _, guildID := range r.UserSettings.GuildPositions {
+			if found && guildID == r.Guilds[b].ID {
+				return true
+			}
+			if !found && guildID == r.Guilds[a].ID {
+				found = true
+			}
+		}
+
+		return false
+	})
+
+	for _, g := range r.Guilds {
+		app.GuildsList.AddItem(g.Name, "", 0, nil)
+	}
 }
